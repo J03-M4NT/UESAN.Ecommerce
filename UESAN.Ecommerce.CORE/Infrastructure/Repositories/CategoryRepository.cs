@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UESAN.Ecommerce.CORE.Core.Entities;
+using UESAN.Ecommerce.CORE.Core.Interfaces;
 using UESAN.Ecommerce.CORE.Infrastructure.Data;
 
 namespace UESAN.Ecommerce.CORE.Infrastructure.Repositories
 {
-    internal class CategoryRepository
+    public class CategoryRepository : ICategoryRepository
     {
         private readonly StoreDbContext _context;
 
@@ -23,14 +24,14 @@ namespace UESAN.Ecommerce.CORE.Infrastructure.Repositories
         public IEnumerable<Category> GetAllCategories()
         {
             //var context = new StoreDbContext();
-            var categories = _context.Category.Where(x=>x.IsActive == true).ToList();
-            return categories; 
+            var categories = _context.Category.Where(x => x.IsActive == true).ToList();
+            return categories;
         }
 
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()        // Cuando pones Async siempre pones await
         {
             return await _context.Category.ToListAsync();
-            
+
         }
 
         //Get category by id async
@@ -69,6 +70,30 @@ namespace UESAN.Ecommerce.CORE.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        // Update category
+        // 
+        public async Task<bool> UpdateCategoryAsync(Category category)
+        {
+            bool result = false;
+            var existingCategory = await _context.Category.FindAsync(category.Id);
+            if (existingCategory != null)
+            {
+                existingCategory.Description = category.Description;
+                existingCategory.IsActive = category.IsActive;
+                _context.Category.Update(existingCategory);
+                await _context.SaveChangesAsync();
+                result = true;
+            }
+            return result;
+        }
+
+
+
+
+
+
+
 
     }
 }
